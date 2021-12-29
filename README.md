@@ -5,7 +5,11 @@
 
 <p>Description: Python program that will interact with Linux CLI to check status, and change basic settings, for Cloudflare WARP CLI</p>
 
-<p>Prequisites: Linux OS, Python 3 with pillow library, warp-svc running as daemon, warp-cli for Linux installed</p>
+<p>Prequisites:
+- Linux OS (tested on Manjaro Linux)
+- Python 3 with pillow library
+- warp-svc running as daemon
+- warp-cli for Linux installed (instructions at https://developers.cloudflare.com/warp-client/get-started/linux)</p>
 
 License: GPL-3.0
     Copyright (C) 2022  Danie van der Merwe e-mail:gadgeteerza10@gmail.com
@@ -24,12 +28,13 @@ License: GPL-3.0
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     
 **Todo's on the roadmap:**
-- Fix clearing of frames
 - Connect/Disconnect button action
+- Pull though current Family Mode status to radio buttons
 - Fix spacings and layout
-- "Always on" function's radio buttons / button
-- Consider auto-refresh
-- maybe graphs where relevant eg. latency
+- "Always stay connected" option setting
+- Option to switch WARP modes
+- Consider auto-refresh with optional refresh in seconds
+- Maybe graphs where relevant eg. latency
 - Can it show connect status on panel when minimized?
 
 **Versions:**

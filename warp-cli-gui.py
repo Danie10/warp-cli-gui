@@ -1,7 +1,14 @@
 """
 Name: warp-cli-gui
+
 Description: Python program that will interact with Linux CLI to check status, and change basic settings, for Cloudflare WARP CLI
-Prequisites: Linux OS, Python 3 with pillow library, warp-svc running as daemon, warp-cli for Linux installed
+
+Prequisites:
+- Linux OS (tested on Manjaro Linux)
+- Python 3 with pillow library
+- warp-svc running as daemon
+- warp-cli for Linux installed (instructions at https://developers.cloudflare.com/warp-client/get-started/linux)
+
 License: GPL-3.0
     Copyright (C) 2022  Danie van der Merwe e-mail:gadgeteerza10@gmail.com
 
@@ -17,19 +24,20 @@ License: GPL-3.0
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Versions:
+Version 0.1 initial commit 29 Dec 2021
+
+
+TODO: - Connect/Disconnect button action
+TODO: - Pull though current Family Mode status to radio buttons
+TODO: - Fix spacings and layout
+TODO: - "Always stay connected" option setting
+TODO: - Option to switch WARP modes
+TODO: - Consider auto-refresh with optional refresh in seconds
+TODO: - Maybe graphs where relevant eg. latency
+TODO: - Can it show connect status on panel when minimized?
 """
-
-# Versions:
-# Version 0.1 initial commit 29 Dec 2021
-
-
-# TODO: - Fix clearing of frames
-# TODO: - Connect/Disconnect button action
-# TODO: - Fix spacings and layout
-# TODO: - "Always on" function's radio buttons / button
-# TODO: - Consider auto-refresh
-# TODO: - maybe graphs where relevant eg. latency
-# TODO: - Can it show connect status on panel when minimized?
 
 # Import all tkinter GUI library stuff
 from tkinter import *
@@ -68,7 +76,7 @@ if sys.version_info.major < 3:
 # Check if warp-svc daemon running (status = 0), otherwise display instructions to start it, and exits
 daemon = subprocess.call(['systemctl', 'is-active', '--quiet', 'warp-svc'])
 if daemon != 0:
-    messagebox.showerror("Error", "Start daemon with 'systemctl start warp-svc'")
+    messagebox.showerror("Error", "Start daemon from CLI with 'sudo systemctl start warp-svc'")
     sys.exit()
 
 
