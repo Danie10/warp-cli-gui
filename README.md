@@ -1,9 +1,7 @@
 # warp-cli-gui
 <p>GUI app to read settings and stats from Cloudflare WARP CLI for Linux, and change some settings</p>
 
-<p align="center">
 ![Screenshot_20211229_164126](https://user-images.githubusercontent.com/1153726/147673769-e71ec9e9-8901-4021-bcb4-5ea5784e4ef1.jpg)
-</p>
 
 <p>Description: Python program that will interact with Linux CLI to check status, and change basic settings, for Cloudflare WARP CLI</p>
 
