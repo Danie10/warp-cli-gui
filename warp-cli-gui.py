@@ -27,12 +27,13 @@ License: GPL-3.0
 
 Versions:
 Version 0.1 initial commit 29 Dec 2021
+V0.2 - Connect/Disconnect button working, Top frames and status button better aligned, connect status not reliable yet though
 
 
-TODO: - Connect/Disconnect button action
+TODO: - Connect/Disconnect button action (test it more)
 TODO: - Pull though current Family Mode status to radio buttons
 TODO: - Fix spacings and layout
-TODO: - "Always stay connected" option setting
+TODO: - "Always stay connected" option setting to be added
 TODO: - Option to switch WARP modes
 TODO: - Consider auto-refresh with optional refresh in seconds
 TODO: - Maybe graphs where relevant eg. latency
@@ -79,22 +80,21 @@ if daemon != 0:
     messagebox.showerror("Error", "Start daemon from CLI with 'sudo systemctl start warp-svc'")
     sys.exit()
 
-
 # Define frame for Connection Status
 frame_status = LabelFrame(root, text="Status", padx=10, pady=10)
 frame_status.grid(row=0, column=0, padx=10, pady=10)
 
 # Define frame for Settings
 frame_settings = LabelFrame(root, text="Settings", padx=10, pady=10)
-frame_settings.grid(row=0, column=1, padx=10, pady=10)
+frame_settings.grid(rowspan=2, sticky=NW, row=0, column=1, padx=10, pady=10)
 
 # Define frame for Stats
 frame_stats = LabelFrame(root, text="Stats", padx=10, pady=10)
-frame_stats.grid(row=1, column=1, padx=10, pady=10)
+frame_stats.grid(row=2, column=1, padx=10, pady=10)
 
 # Define frame for family mode toggle
 frame_family = LabelFrame(root, text="Family Mode", padx=10, pady=10)
-frame_family.grid(row=1, column=0, padx=10, pady=10)
+frame_family.grid(sticky=N, row=1, column=0, padx=10, pady=10)
 
 
 # Function to handle Family Mode Radio button click
@@ -106,25 +106,34 @@ def family_clicked(value):
     refresh_settings()
 
 def update_conn_status():
-    # Check if warp-cli connection is connected by running status command, and format returned text
+    # Check if warp-cli connection is connected by running status command, and format returned text, and set connect status variable
     # TODO: Need to try improve reliability for extraction part
     # Use globally defined connected variable
     global connected
     warp_connected = ((subprocess.run(['warp-cli', 'status'], capture_output=True)).stdout).splitlines()
     # Extract part where 'Connected' should appear
-        # warp_connected_msg = warp_connected[23 : 32]
-    warp_connected_msg = str(warp_connected[1])
-    if warp_connected_msg == "b'Status update: Connected'":
-        myConnect_Btn = Button(frame_status, text=" Connected ", bg="green")
+    warp_connected = str(warp_connected[1])
+
+    if warp_connected == "b'Status update: Connected'":
+#        myConnect_Btn = Button(frame_status, text=" Connected ", width=10, bg="green", relief=RAISED)
         connected = True
     else:
-        myConnect_Btn = Button(frame_status, text="Disconnected", bg="red")
+#        myConnect_Btn = Button(frame_status, text="Disconnected", width=10, bg="red", relief=SUNKEN)
         connected = False
-    # Display button with colour as status
-    myConnect_Btn.grid(row=0, column=0)
-    # Debug Condition to check extracted text
-    #print("|" + warp_connected_msg + "|")
 
+    # Debug Condition to check extracted text
+    #print("|" + warp_connected + "|")
+
+
+def connect_clicked():
+    print("Is this click working?")
+    if connected:
+        # Run command to disconnect and result should be 'Success' as result[0]
+        result = (subprocess.run(['warp-cli', 'disconnect'], capture_output=True, text=True)).stdout
+    else:
+        result = (subprocess.run(['warp-cli', 'connect'], capture_output=True, text=True)).stdout
+    
+    refresh_all()
 
 def refresh_settings():
     # Clear any previous widgets displays before displaying new data
@@ -193,21 +202,36 @@ def refresh_stats():
         warp_stats_noconnect_lbl = Label(frame_stats, text="   Not connected   ")
         warp_stats_noconnect_lbl.grid(row=0, column=0, sticky=W)
 
+def display_connect_btn():
+    # Add CONNECT BUTTON to Status frame
+    if connected:
+        myConnect_Btn = Button(frame_status, text=" Connected ", width=10, bg="green", relief=RAISED, command=connect_clicked)
+    else:
+        myConnect_Btn = Button(frame_status, text="Disconnected", width=10, bg="red", relief=SUNKEN, command=connect_clicked)
+    myConnect_Btn.grid(row=0, column=0)
+
 
 def refresh_all():
     update_conn_status()
+    display_connect_btn()
     refresh_settings()
     refresh_stats()
 
 
 # Main program starts here
 update_conn_status()
+display_connect_btn()
 refresh_settings()
 refresh_stats()
 
-# Family mode radio buttons
+
+
+
+
+
+# Family mode radio buttons to Family frame
 family_mode = StringVar()
-# Get existing value
+# TODO: Get existing value and set it
 family_mode.set("malware")
 # Define radio buttons and display
 Radiobutton(frame_family, text="Full", variable=family_mode, value="full", command=lambda: family_clicked(family_mode.get())).pack(anchor=W)

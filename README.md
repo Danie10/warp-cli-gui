@@ -15,7 +15,13 @@ Python program that will interact with Linux CLI to check status, and change bas
 
 ## License
 This software is available under the GPL-3.0. You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/> for more info.
-    
+
+# Functionality
+- Status button toggles connect or disconnect from WARP
+- Family mode can be toggled between Full, Malware, Off
+- Current settings displayed and refreshed if changed (press refresh button)
+- Current stats displayed and refreshed if refresh button pressed (manual refresh only right now)
+
 ## Todo's on the Road Map
 - Connect/Disconnect button action
 - Pull though current Family Mode status to radio buttons
@@ -31,3 +37,4 @@ See my video about the initial creation of this app at https://youtu.be/hhPhiV0o
 
 ## Versions
 V0.1 - Initial release on 29 Dec 2021. Basically functional but needs connect button to be activated.
+V0.2 - Connect/Disconnect button working, Top frames and status button better aligned, connect status not reliable yet though
