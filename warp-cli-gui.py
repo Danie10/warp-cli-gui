@@ -26,14 +26,13 @@ License: GPL-3.0
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Versions:
-Version 0.1 initial commit 29 Dec 2021
-V0.2 Connect/Disconnect button working, Top frames and status button better aligned, connect status not reliable yet though
-V0.3 Finally stable for connect/disconnect status
+- V0.1 29 Dec 2021 Initial commit. Basically functional but needs connect button to be activated.
+- V0.2 Connect/Disconnect button working, Top frames and status button better aligned, connect status not reliable yet though
+- V0.3 Connect/Disconnect button status is finally stable through IF condition testing more rigourously for alternatives being returned from status command
+- V0.4 30 Dec 2021 Fixed size window, with fixed size frames and spacing
 
 
-TODO: - Connect/Disconnect button action (test it more as sometimes manual refresh needed after reconnection to show green)
 TODO: - Pull though current Family Mode status to radio buttons
-TODO: - Fix spacings and layout
 TODO: - "Always stay connected" option setting to be added
 TODO: - Option to switch WARP modes
 TODO: - Consider auto-refresh with optional refresh in seconds
@@ -54,7 +53,7 @@ import subprocess
 
 # Set global variable to test during execution if connected
 connected = True
-version = "V0.3"
+version = "V0.4"
 
 # set root window called root
 root = Tk()
@@ -63,7 +62,9 @@ root.title('Cloudflare WARP GUI ' + version)
 # Set window logo
 root.iconphoto(True, PhotoImage(file="hardheadlogo32.png"))
 # Set size of main window
-root.geometry("400x400")
+root.geometry("420x410")
+# Prevent resizing of root window
+root.resizable(width=False, height=False)
 
 
 # Checks first to see if the app is running on Linux otherwise pops error and exits
@@ -87,16 +88,19 @@ frame_status = LabelFrame(root, text="Status", padx=10, pady=10)
 frame_status.grid(row=0, column=0, padx=10, pady=10)
 
 # Define frame for Settings
-frame_settings = LabelFrame(root, text="Settings", padx=10, pady=10)
+frame_settings = LabelFrame(root, width=230, height=190, text="Settings", padx=10, pady=10)
 frame_settings.grid(rowspan=2, sticky=NW, row=0, column=1, padx=10, pady=10)
+frame_settings.grid_propagate(False)  # Stops frame shrinking with smaller contents
 
 # Define frame for Stats
-frame_stats = LabelFrame(root, text="Stats", padx=10, pady=10)
+frame_stats = LabelFrame(root, width=230, height=130, text="Stats", padx=10, pady=10)
 frame_stats.grid(row=2, column=1, padx=10, pady=10)
+frame_stats.grid_propagate(False)  # Stops frame shrinking with smaller contents
 
 # Define frame for family mode toggle
-frame_family = LabelFrame(root, text="Family Mode", padx=10, pady=10)
+frame_family = LabelFrame(root, width=200, height=110, text="Family Mode", padx=10, pady=10)
 frame_family.grid(sticky=N, row=1, column=0, padx=10, pady=10)
+frame_family.grid_propagate(False)  # Stops frame shrinking with smaller contents
 
 
 def family_clicked(value):
@@ -191,20 +195,12 @@ def refresh_stats():
         warp_stats_loss = warp_stats[4]
     
         # Define labels and display in frame for above settings
-        warp_stats_time_lbl = Label(frame_stats, text=warp_stats_time)
-        warp_stats_time_lbl.grid(row=0, column=0, sticky=W)
-
-        warp_stats_data_lbl = Label(frame_stats, text=warp_stats_data)
-        warp_stats_data_lbl.grid(row=1, column=0, sticky=W)
-
-        warp_stats_latency_lbl = Label(frame_stats, text=warp_stats_latency)
-        warp_stats_latency_lbl.grid(row=2, column=0, sticky=W)
-
-        warp_stats_loss_lbl = Label(frame_stats, text=warp_stats_loss)
-        warp_stats_loss_lbl.grid(row=3, column=0, sticky=W)
+        warp_stats_time_lbl = Label(frame_stats, text=warp_stats_time).grid(row=0, column=0, sticky=W)
+        warp_stats_data_lbl = Label(frame_stats, text=warp_stats_data).grid(row=1, column=0, sticky=W)
+        warp_stats_latency_lbl = Label(frame_stats, text=warp_stats_latency).grid(row=2, column=0, sticky=W)
+        warp_stats_loss_lbl = Label(frame_stats, text=warp_stats_loss).grid(row=3, column=0, sticky=W)
     else:
-        warp_stats_noconnect_lbl = Label(frame_stats, text="   Not connected   ")
-        warp_stats_noconnect_lbl.grid(row=0, column=0, sticky=W)
+        warp_stats_noconnect_lbl = Label(frame_stats, text="Not connected").grid(padx=60, pady=25)
 
 
 def display_connect_btn():
@@ -228,7 +224,6 @@ update_conn_status()
 display_connect_btn()
 refresh_settings()
 refresh_stats()
-
 
 
 # Family mode radio buttons to Family frame
