@@ -4,11 +4,14 @@
 ![Screenshot Connected](assets/screenshot_connected.jpg)
 
 ![Screenshot Disconnected](assets/screenshot_disconnected.jpg)
+
+[![Short Video](https://img.youtube.com/vi/MtlUrAmhWzI/0.jpg)](https://www.youtube.com/watch?v=MtlUrAmhWzI)
+
 ## Description
 Python program that will interact with Linux CLI to check status, and change basic settings, for Cloudflare WARP CLI.</p>
 
 ## Requirements and Execution
-- Linux OS (tested on Manjaro Linux)
+- LinuMtlUrAmhWzIx OS (tested on Manjaro Linux)
 - Python 3 with pillow library
 - warp-svc running as daemon (should be installed with warp-cli)
 - warp-cli for Linux installed (instructions at https://developers.cloudflare.com/warp-client/get-started/linux)
