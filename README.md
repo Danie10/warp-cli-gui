@@ -20,11 +20,10 @@ This software is available under the GPL-3.0. You should have received a copy of
 ## Functionality
 - Status button toggles connect or disconnect from WARP
 - Family mode can be toggled between Full, Malware, Off
-- Current settings displayed and refreshed if changed (press refresh button)
-- Current stats displayed and refreshed if refresh button pressed (manual refresh only right now)
+- Current WARP settings displayed, and refreshed if changed (or press refresh button)
+- Current WARP stats displayed and refreshed if refresh button pressed (manual refresh only right now)
 
 ## Todo's on the Road Map
-- Connect/Disconnect button action (test it more as sometimes manual refresh needed after reconnection to show green)
 - Pull though current Family Mode status to radio buttons
 - Fix spacings and layout
 - "Always stay connected" option setting
@@ -39,3 +38,4 @@ See my video about the initial creation of this app at https://youtu.be/hhPhiV0o
 ## Versions
 - V0.1 Initial release on 29 Dec 2021. Basically functional but needs connect button to be activated.
 - V0.2 Connect/Disconnect button working, Top frames and status button better aligned, connect status not reliable yet though
+- V0.3 Connect/Disconnect button status is finally stable through IF condition testing more rigourously for alternatives being returned from status command

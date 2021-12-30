@@ -27,7 +27,8 @@ License: GPL-3.0
 
 Versions:
 Version 0.1 initial commit 29 Dec 2021
-V0.2 - Connect/Disconnect button working, Top frames and status button better aligned, connect status not reliable yet though
+V0.2 Connect/Disconnect button working, Top frames and status button better aligned, connect status not reliable yet though
+V0.3 Finally stable for connect/disconnect status
 
 
 TODO: - Connect/Disconnect button action (test it more as sometimes manual refresh needed after reconnection to show green)
@@ -53,15 +54,16 @@ import subprocess
 
 # Set global variable to test during execution if connected
 connected = True
+version = "V0.3"
 
 # set root window called root
 root = Tk()
 # Set window title
-root.title('Cloudflare WARP GUI')
+root.title('Cloudflare WARP GUI ' + version)
 # Set window logo
 root.iconphoto(True, PhotoImage(file="hardheadlogo32.png"))
 # Set size of main window
-root.geometry("400x450")
+root.geometry("400x400")
 
 
 # Checks first to see if the app is running on Linux otherwise pops error and exits
@@ -97,8 +99,8 @@ frame_family = LabelFrame(root, text="Family Mode", padx=10, pady=10)
 frame_family.grid(sticky=N, row=1, column=0, padx=10, pady=10)
 
 
-# Function to handle Family Mode Radio button click
 def family_clicked(value):
+    # Function to handle Family Mode Radio button click
     # Execute the set-families-mode change using value brought over from radio button press
     # Todo = test result for valid execution
     result = (subprocess.run(['warp-cli', 'set-families-mode', value], capture_output=True, text=True)).stdout
@@ -107,32 +109,34 @@ def family_clicked(value):
 
 def update_conn_status():
     # Check if warp-cli connection is connected by running status command, and format returned text, and set connect status variable
-    # TODO: Need to try improve reliability for extraction part
     # Use globally defined connected variable
     global connected
+    # Runs CLI command to check status for connectivity
     warp_connected = ((subprocess.run(['warp-cli', 'status'], capture_output=True)).stdout).splitlines()
-    # Extract part where 'Connected' should appear
+    # Extract part where "b'Status update: Connected'"" or "b'Status update: Connected'"" should appear and set warp_connected to that
+    # "b'Success'" or "b'Status update: Connecting'" are also possible, but if returned, then retest again by recalling function
     warp_connected = str(warp_connected[1])
-
+    
     if warp_connected == "b'Status update: Connected'":
-#        myConnect_Btn = Button(frame_status, text=" Connected ", width=10, bg="green", relief=RAISED)
         connected = True
-    else:
-#        myConnect_Btn = Button(frame_status, text="Disconnected", width=10, bg="red", relief=SUNKEN)
+    elif warp_connected == "b'Status update: Disconnected'":
         connected = False
+    else:
+        # Means any of the two sought status' were not returned yet, so retry
+        update_conn_status()
 
     # Debug Condition to check extracted text
     #print("|" + warp_connected + "|")
 
 
 def connect_clicked():
-    print("Is this click working?")
     if connected:
         # Run command to disconnect and result should be 'Success' as result[0]
         result = (subprocess.run(['warp-cli', 'disconnect'], capture_output=True, text=True)).stdout
     else:
+        # Run command to connect and result should be 'Success' as result[0]
         result = (subprocess.run(['warp-cli', 'connect'], capture_output=True, text=True)).stdout
-    
+    # Now refresh
     refresh_all()
 
 def refresh_settings():
@@ -177,7 +181,7 @@ def refresh_stats():
     for widgets in frame_stats.winfo_children():
         widgets.destroy()    
 
-    # If connected do stats, if not nothing to display so output message
+    # If connected do stats, if not connected then just display message
     if connected:
         # Check and read output of stats into a list, every line split into new list item, displayed in frame
         warp_stats = ((subprocess.run(['warp-cli', 'warp-stats'], capture_output=True)).stdout).splitlines()
@@ -202,8 +206,9 @@ def refresh_stats():
         warp_stats_noconnect_lbl = Label(frame_stats, text="   Not connected   ")
         warp_stats_noconnect_lbl.grid(row=0, column=0, sticky=W)
 
+
 def display_connect_btn():
-    # Add CONNECT BUTTON to Status frame
+    # Add CONNECT BUTTON to Status frame with text description and colour
     if connected:
         myConnect_Btn = Button(frame_status, text=" Connected ", width=10, bg="green", relief=RAISED, command=connect_clicked)
     else:
@@ -223,9 +228,6 @@ update_conn_status()
 display_connect_btn()
 refresh_settings()
 refresh_stats()
-
-
-
 
 
 
