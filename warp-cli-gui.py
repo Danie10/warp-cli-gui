@@ -30,7 +30,7 @@ Version 0.1 initial commit 29 Dec 2021
 V0.2 - Connect/Disconnect button working, Top frames and status button better aligned, connect status not reliable yet though
 
 
-TODO: - Connect/Disconnect button action (test it more)
+TODO: - Connect/Disconnect button action (test it more as sometimes manual refresh needed after reconnection to show green)
 TODO: - Pull though current Family Mode status to radio buttons
 TODO: - Fix spacings and layout
 TODO: - "Always stay connected" option setting to be added
