@@ -44,4 +44,4 @@ See my video about the initial creation of this app at https://youtu.be/hhPhiV0o
 - V0.3 Connect/Disconnect button status is finally stable through IF condition testing more rigorously for alternatives being returned from status command
 - V0.4 30 Dec 2021 Fixed size window, with fixed size frames and spacing
 - V0.5 31 Dec 2021 Cloudflare Warp logo added, connect status button colours changed (thanks to my wife Chantel for helping with this), family mode radio button defaults to existing setting, stats auto refresh every 2 secs after Refresh button pressed
-- V1.0 31 Dec 2021 First stable version with just README file updated
+- V1.0 31 Dec 2021 First stable version with just README file updated. Binary for Linux added as a release.
