@@ -81,7 +81,7 @@ if sys.version_info.major < 3:
 # Check if warp-svc daemon running (status = 0), otherwise display instructions to start it, and exits
 daemon = subprocess.call(['systemctl', 'is-active', '--quiet', 'warp-svc'])
 if daemon != 0:
-    messagebox.showerror("Error", "Start daemon from CLI with 'sudo systemctl start warp-svc'")
+    messagebox.showerror("Error", "Start daemon from CLI with 'sudo systemctl start warp-svc' and ensure it is registered")
     sys.exit()
 
 # Define frame for Connection Status

@@ -13,9 +13,11 @@ Python GUI program that will interact with Linux CLI to check status, and change
 ## Requirements and Execution
 - Linux OS (tested on Manjaro Linux)
 - Python 3 with pillow library
-- warp-svc running as daemon (should be installed with warp-cli)
-- warp-cli for Linux installed (instructions at https://developers.cloudflare.com/warp-client/get-started/linux)
-- Copy these source files into a single folder, and execute with 'python warp-cli-gui.py'. For ease of use you can add this command, and the working directory, to a new menu item on Linux.
+- warp-svc running as daemon by running either 'sudo systemctl start warp-svc' for once off, or 'sudo systemctl enable warp-svc' for boot time activation (should have been installed with warp-cli)
+- warp-cli for Linux installed, and the once-off registration done by running 'warp-cli register' (instructions at https://developers.cloudflare.com/warp-client/get-started/linux)
+- Two options to execute this app:
+  - With Python already installed: Copy the warp-cli-gui.py and warp_logo.png source files into a single folder, and execute with 'python warp-cli-gui.py'. For ease of use you can add this command, and the working directory, to a new menu item on Linux.
+  - As an Executable: Download the binary release from Github into any directory location on your computer, ensure the warp-cli-gui file has execute permissions, then execute with './warp-cli-gui' from that directory.
 
 ## License
 This software is available under the GPL-3.0. You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/> for more info.
