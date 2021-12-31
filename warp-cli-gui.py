@@ -1,7 +1,7 @@
 """
 Name: warp-cli-gui
 
-Description: Python program that will interact with Linux CLI to check status, and change basic settings, for Cloudflare WARP CLI
+Description: Python GUI program that will interact with Linux CLI to check status, and change basic settings, for Cloudflare WARP CLI
 
 Prequisites:
 - Linux OS (tested on Manjaro Linux)
@@ -30,8 +30,8 @@ Versions:
 - V0.2 Connect/Disconnect button working, Top frames and status button better aligned, connect status not reliable yet though
 - V0.3 Connect/Disconnect button status is finally stable through IF condition testing more rigorously for alternatives being returned from status command
 - V0.4 30 Dec 2021 Fixed size window, with fixed size frames and spacing
-- V0.5 31 Dec 2021 Cloudflare Warp logo added, connect status button colours changed, family mode radio button defaults to existing setting, stats auto refresh every 2 secs after Refresh button pressed
-
+- V0.5 31 Dec 2021 Cloudflare Warp logo added, connect status button colours changed (thanks to my wife Chantel for helping with this), family mode radio button defaults to existing setting, stats auto refresh every 2 secs after Refresh button pressed
+- V1.0 31 Dec 2021 First stable version with just README file updated
 
 TODO: - "Always stay connected" option setting to be added
 TODO: - Option to switch WARP modes
@@ -53,7 +53,7 @@ import subprocess
 
 # Set global variable to test during execution if connected
 connected = True
-version = "V0.5"
+version = "V1.0"
 
 
 # set root window called root
