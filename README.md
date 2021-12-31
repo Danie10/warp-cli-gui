@@ -36,7 +36,7 @@ This software is available under the GPL-3.0. You should have received a copy of
 - Can it show connect status on panel when minimized?
 
 ## Video
-See my video about the initial creation of this app at https://youtu.be/hhPhiV0o5us
+See my video about the initial creation of this app at https://youtu.be/hhPhiV0o5us.
 
 ## Versions
 - V0.1 29 Dec 2021 Initial commit. Basically functional but needs connect button to be activated.
