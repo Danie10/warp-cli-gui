@@ -27,10 +27,9 @@ This software is available under the GPL-3.0. You should have received a copy of
 - Current WARP stats displayed and refreshed if refresh button pressed (manual refresh only right now)
 
 ## Todo's on the Road Map
-- Pull though current Family Mode status to radio buttons
 - "Always stay connected" option setting
 - Option to switch WARP modes
-- Consider auto-refresh with optional refresh in seconds
+- Testing auto-refresh of stats frame with 2 sec interval - consider optional refresh in seconds or disable
 - Maybe graphs where relevant eg. latency
 - Can it show connect status on panel when minimized?
 
@@ -40,5 +39,6 @@ See my video about the initial creation of this app at https://youtu.be/hhPhiV0o
 ## Versions
 - V0.1 29 Dec 2021 Initial commit. Basically functional but needs connect button to be activated.
 - V0.2 Connect/Disconnect button working, Top frames and status button better aligned, connect status not reliable yet though
-- V0.3 Connect/Disconnect button status is finally stable through IF condition testing more rigourously for alternatives being returned from status command
+- V0.3 Connect/Disconnect button status is finally stable through IF condition testing more rigorously for alternatives being returned from status command
 - V0.4 30 Dec 2021 Fixed size window, with fixed size frames and spacing
+- V0.5 31 Dec 2021 Cloudflare Warp logo added, connect status button colours changed, family mode radio button defaults to existing setting, stats auto refresh every 2 secs after Refresh button pressed

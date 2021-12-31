@@ -28,14 +28,14 @@ License: GPL-3.0
 Versions:
 - V0.1 29 Dec 2021 Initial commit. Basically functional but needs connect button to be activated.
 - V0.2 Connect/Disconnect button working, Top frames and status button better aligned, connect status not reliable yet though
-- V0.3 Connect/Disconnect button status is finally stable through IF condition testing more rigourously for alternatives being returned from status command
+- V0.3 Connect/Disconnect button status is finally stable through IF condition testing more rigorously for alternatives being returned from status command
 - V0.4 30 Dec 2021 Fixed size window, with fixed size frames and spacing
+- V0.5 31 Dec 2021 Cloudflare Warp logo added, connect status button colours changed, family mode radio button defaults to existing setting, stats auto refresh every 2 secs after Refresh button pressed
 
 
-TODO: - Pull though current Family Mode status to radio buttons
 TODO: - "Always stay connected" option setting to be added
 TODO: - Option to switch WARP modes
-TODO: - Consider auto-refresh with optional refresh in seconds
+TODO: - Testing auto-refresh with 2 sec interval - optional refresh in seconds
 TODO: - Maybe graphs where relevant eg. latency
 TODO: - Can it show connect status on panel when minimized?
 """
@@ -53,14 +53,15 @@ import subprocess
 
 # Set global variable to test during execution if connected
 connected = True
-version = "V0.4"
+version = "V0.5"
+
 
 # set root window called root
 root = Tk()
 # Set window title
 root.title('Cloudflare WARP GUI ' + version)
 # Set window logo
-root.iconphoto(True, PhotoImage(file="hardheadlogo32.png"))
+root.iconphoto(True, PhotoImage(file="warp_logo.png"))
 # Set size of main window
 root.geometry("420x410")
 # Prevent resizing of root window
@@ -111,6 +112,7 @@ def family_clicked(value):
     # Refresh settings frame as value may have changed
     refresh_settings()
 
+
 def update_conn_status():
     # Check if warp-cli connection is connected by running status command, and format returned text, and set connect status variable
     # Use globally defined connected variable
@@ -143,7 +145,9 @@ def connect_clicked():
     # Now refresh
     refresh_all()
 
+
 def refresh_settings():
+    global family_mode_status
     # Clear any previous widgets displays before displaying new data
     for widgets in frame_settings.winfo_children():
         widgets.destroy()
@@ -156,6 +160,8 @@ def refresh_settings():
     warp_settings_wifi = warp_settings[4]
     warp_settings_eth = warp_settings[5]
     warp_settings_dns = warp_settings[6]
+    # Set global family_mode_status to just extracted value at end
+    family_mode_status = warp_settings_family[25 : ].lower()
 
     # Define labels and display in frame for above settings
     warp_settings_aon_lbl = Label(frame_settings, text=warp_settings_aon)
@@ -167,7 +173,7 @@ def refresh_settings():
     warp_settings_mode_lbl = Label(frame_settings, text=warp_settings_mode)
     warp_settings_mode_lbl.grid(row=2, column=0, sticky=W)
 
-    warp_settings_family_lbl = Label(frame_settings, text=warp_settings_family)
+    warp_settings_family_lbl = Label(frame_settings, text= warp_settings_family)
     warp_settings_family_lbl.grid(row=3, column=0, sticky=W)
 
     warp_settings_wifi_lbl = Label(frame_settings, text=warp_settings_wifi)
@@ -206,9 +212,9 @@ def refresh_stats():
 def display_connect_btn():
     # Add CONNECT BUTTON to Status frame with text description and colour
     if connected:
-        myConnect_Btn = Button(frame_status, text=" Connected ", width=10, bg="green", relief=RAISED, command=connect_clicked)
+        myConnect_Btn = Button(frame_status, text=" Connected ", width=10, bg="#76a633", relief=RAISED, command=connect_clicked)
     else:
-        myConnect_Btn = Button(frame_status, text="Disconnected", width=10, bg="red", relief=SUNKEN, command=connect_clicked)
+        myConnect_Btn = Button(frame_status, text="Disconnected", width=10, bg="#ff8d00", relief=SUNKEN, command=connect_clicked)
     myConnect_Btn.grid(row=0, column=0)
 
 
@@ -217,6 +223,15 @@ def refresh_all():
     display_connect_btn()
     refresh_settings()
     refresh_stats()
+    # Start auto refresh stats function (only after refresh button pressed)
+    auto_refresh_stats()
+
+def auto_refresh_stats():
+    # Testing a  auto refresh loop every 2 secs
+    # Functions to call to auto refresh
+    if connected:
+        refresh_stats()
+        root.after(2000, auto_refresh_stats)
 
 
 # Main program starts here
@@ -226,10 +241,11 @@ refresh_settings()
 refresh_stats()
 
 
+
 # Family mode radio buttons to Family frame
 family_mode = StringVar()
-# TODO: Get existing value and set it
-family_mode.set("malware")
+# Set default radio button to family_mode_status returned from checking settings
+family_mode.set(family_mode_status)
 # Define radio buttons and display
 Radiobutton(frame_family, text="Full", variable=family_mode, value="full", command=lambda: family_clicked(family_mode.get())).pack(anchor=W)
 Radiobutton(frame_family, text="Malware", variable=family_mode, value="malware", command=lambda: family_clicked(family_mode.get())).pack(anchor=W)
