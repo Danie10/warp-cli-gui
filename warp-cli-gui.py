@@ -1,7 +1,7 @@
 """
 Name: warp-cli-gui
 
-Description: Python GUI program that will interact with Linux CLI to check status, and change basic settings, for Cloudflare WARP CLI
+Description: Python GUI program that will interact with the Linux command line to check status, and change basic settings, for Cloudflare WARP CLI.
 
 Prequisites:
 - Linux OS (tested on Manjaro Linux)
@@ -32,12 +32,12 @@ Versions:
 - V0.4 30 Dec 2021 Fixed size window, with fixed size frames and spacing
 - V0.5 31 Dec 2021 Cloudflare Warp logo added, connect status button colours changed (thanks to my wife Chantel for helping with this), family mode radio button defaults to existing setting, stats auto refresh every 2 secs after Refresh button pressed
 - V1.0 31 Dec 2021 First stable version with just README file updated
+- V1.1 1 Jan 2022 Tidied up button press color, optimized some code, added Always On toggle setting
 
-TODO: - "Always stay connected" option setting to be added
 TODO: - Option to switch WARP modes
 TODO: - Testing auto-refresh with 2 sec interval - optional refresh in seconds
 TODO: - Maybe graphs where relevant eg. latency
-TODO: - Can it show connect status on panel when minimized?
+TODO: - Can it show connect status on panel when minimized? Qt can.
 """
 
 # Import all tkinter GUI library stuff
@@ -50,10 +50,13 @@ from tkinter import messagebox
 import sys
 # To execute external CLI commands to read status and change settings
 import subprocess
+import time
 
-# Set global variable to test during execution if connected
+
+# Set global variable to test during execution
+version = "V1.1"
 connected = True
-version = "V1.0"
+update_interval = 2000 # Milliseconds
 
 
 # set root window called root
@@ -66,6 +69,11 @@ root.iconphoto(True, PhotoImage(file="warp_logo.png"))
 root.geometry("420x410")
 # Prevent resizing of root window
 root.resizable(width=False, height=False)
+
+
+# Define Our Toggle Images
+toggle_on = PhotoImage(file = "on.png")
+toggle_off = PhotoImage(file = "off.png")
 
 
 # Checks first to see if the app is running on Linux otherwise pops error and exits
@@ -81,7 +89,7 @@ if sys.version_info.major < 3:
 # Check if warp-svc daemon running (status = 0), otherwise display instructions to start it, and exits
 daemon = subprocess.call(['systemctl', 'is-active', '--quiet', 'warp-svc'])
 if daemon != 0:
-    messagebox.showerror("Error", "Start daemon from CLI with 'sudo systemctl start warp-svc' and ensure it is registered")
+    messagebox.showerror("Error", "Start daemon from CLI with\n'sudo systemctl start warp-svc'\nand ensure registration has run")
     sys.exit()
 
 # Define frame for Connection Status
@@ -99,9 +107,14 @@ frame_stats.grid(row=2, column=1, padx=10, pady=10)
 frame_stats.grid_propagate(False)  # Stops frame shrinking with smaller contents
 
 # Define frame for family mode toggle
-frame_family = LabelFrame(root, width=200, height=110, text="Family Mode", padx=10, pady=10)
+frame_family = LabelFrame(root, width=130, height=120, text="Family Mode", padx=10, pady=10)
 frame_family.grid(sticky=N, row=1, column=0, padx=10, pady=10)
 frame_family.grid_propagate(False)  # Stops frame shrinking with smaller contents
+
+# Define frame for Always On toggle
+frame_aon = LabelFrame(root, width=130, height=130, text="Always On Mode", padx=10, pady=10)
+frame_aon.grid(sticky=N, row=2, column=0, padx=10, pady=10)
+frame_aon.grid_propagate(False)  # Stops frame shrinking with smaller contents
 
 
 def family_clicked(value):
@@ -148,6 +161,7 @@ def connect_clicked():
 
 def refresh_settings():
     global family_mode_status
+    global always_connected
     # Clear any previous widgets displays before displaying new data
     for widgets in frame_settings.winfo_children():
         widgets.destroy()
@@ -162,6 +176,15 @@ def refresh_settings():
     warp_settings_dns = warp_settings[6]
     # Set global family_mode_status to just extracted value at end
     family_mode_status = warp_settings_family[25 : ].lower()
+    # Set global value always_connected to boolean of retrieved warp_settings_aon
+    if str(warp_settings_aon) == "b'Always On: false'":
+        always_connected = False
+    elif str(warp_settings_aon) == "b'Always On: true'":
+        always_connected = True
+    else:
+        # Pause 0.5 sec and retry as no valid option returned yet
+        time.sleep(0.5)
+        refresh_settings()
 
     # Define labels and display in frame for above settings
     warp_settings_aon_lbl = Label(frame_settings, text=warp_settings_aon)
@@ -208,13 +231,34 @@ def refresh_stats():
     else:
         warp_stats_noconnect_lbl = Label(frame_stats, text="Not connected").grid(padx=60, pady=25)
 
+def toggle_aon():
+    global always_connected
+    if always_connected:
+        # Run command to toggle to always connected off
+        result = (subprocess.run(['warp-cli', 'disable-always-on'], capture_output=True, text=True)).stdout
+    else:
+        # Run command to toggle to always connected on
+        result = (subprocess.run(['warp-cli', 'enable-always-on'], capture_output=True, text=True)).stdout
+    refresh_settings()  # Will retrieve changed always_connected settings from CLI
+    display_aon()
+
+def display_aon():
+    global toggle_off, toggle_on
+    global always_connected
+    if always_connected:
+        # ALWAYS CONNECTED toggle button to AON frame
+        always_conn_btn = Button(frame_aon, image = toggle_on, command=toggle_aon)
+    else:
+        # ALWAYS CONNECTED toggle button to AON frame
+        always_conn_btn = Button(frame_aon, image = toggle_off, command=toggle_aon)
+    always_conn_btn.grid(row=0, column=0, pady=20)
 
 def display_connect_btn():
     # Add CONNECT BUTTON to Status frame with text description and colour
     if connected:
-        myConnect_Btn = Button(frame_status, text=" Connected ", width=10, bg="#76a633", relief=RAISED, command=connect_clicked)
+        myConnect_Btn = Button(frame_status, text=" Connected ", width=10, bg="#76a633", activebackground="#76a633", relief=RAISED, command=connect_clicked)
     else:
-        myConnect_Btn = Button(frame_status, text="Disconnected", width=10, bg="#ff8d00", relief=SUNKEN, command=connect_clicked)
+        myConnect_Btn = Button(frame_status, text="Disconnected", width=10, bg="#ff8d00", activebackground="#ff8d00", relief=SUNKEN, command=connect_clicked)
     myConnect_Btn.grid(row=0, column=0)
 
 
@@ -223,6 +267,7 @@ def refresh_all():
     display_connect_btn()
     refresh_settings()
     refresh_stats()
+    display_aon()
     # Start auto refresh stats function (only after refresh button pressed)
     auto_refresh_stats()
 
@@ -231,13 +276,14 @@ def auto_refresh_stats():
     # Functions to call to auto refresh
     if connected:
         refresh_stats()
-        root.after(2000, auto_refresh_stats)
+        root.after(update_interval, auto_refresh_stats)
 
 
 # Main program starts here
 update_conn_status()
 display_connect_btn()
 refresh_settings()
+display_aon()
 refresh_stats()
 
 
@@ -248,7 +294,7 @@ family_mode = StringVar()
 family_mode.set(family_mode_status)
 # Define radio buttons and display
 Radiobutton(frame_family, text="Full", variable=family_mode, value="full", command=lambda: family_clicked(family_mode.get())).pack(anchor=W)
-Radiobutton(frame_family, text="Malware", variable=family_mode, value="malware", command=lambda: family_clicked(family_mode.get())).pack(anchor=W)
+Radiobutton(frame_family, text="Malware       ", variable=family_mode, value="malware", command=lambda: family_clicked(family_mode.get())).pack(anchor=W)
 Radiobutton(frame_family, text="Off", variable=family_mode, value="off", command=lambda: family_clicked(family_mode.get())).pack(anchor=W)
 
 
