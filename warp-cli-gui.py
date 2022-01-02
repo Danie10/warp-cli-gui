@@ -5,8 +5,8 @@ Description: Python GUI program that will interact with the Linux command line t
 
 Prequisites:
 - Linux OS (tested on Manjaro Linux)
-- Python 3 with pillow library
-- warp-svc running as daemon
+- Python 3 with pillow library (if not running binary)
+- warp-svc running as system daemon (see README notes)
 - warp-cli for Linux installed (instructions at https://developers.cloudflare.com/warp-client/get-started/linux)
 
 License: GPL-3.0
@@ -33,9 +33,10 @@ Versions:
 - V0.5 31 Dec 2021 Cloudflare Warp logo added, connect status button colours changed (thanks to my wife Chantel for helping with this), family mode radio button defaults to existing setting, stats auto refresh every 2 secs after Refresh button pressed
 - V1.0 31 Dec 2021 First stable version with just README file updated
 - V1.1 1 Jan 2022 Tidied up button press color, optimized some code, added Always On toggle setting
+- V1.2 2 Jan 2022 Removed border around toggle button, auto-refresh of stats every 2 secs when connected, optimized function naming, checks lost network connection
+
 
 TODO: - Option to switch WARP modes
-TODO: - Testing auto-refresh with 2 sec interval - optional refresh in seconds
 TODO: - Maybe graphs where relevant eg. latency
 TODO: - Can it show connect status on panel when minimized? Qt can.
 """
@@ -50,11 +51,10 @@ from tkinter import messagebox
 import sys
 # To execute external CLI commands to read status and change settings
 import subprocess
-import time
 
 
 # Set global variable to test during execution
-version = "V1.1"
+version = "V1.2"
 connected = True
 update_interval = 2000 # Milliseconds
 
@@ -122,11 +122,11 @@ def family_clicked(value):
     # Execute the set-families-mode change using value brought over from radio button press
     # Todo = test result for valid execution
     result = (subprocess.run(['warp-cli', 'set-families-mode', value], capture_output=True, text=True)).stdout
-    # Refresh settings frame as value may have changed
-    refresh_settings()
+    # Refresh settings frame as value may have changed with click
+    get_settings()
 
 
-def update_conn_status():
+def get_conn_status():
     # Check if warp-cli connection is connected by running status command, and format returned text, and set connect status variable
     # Use globally defined connected variable
     global connected
@@ -135,31 +135,34 @@ def update_conn_status():
     # Extract part where "b'Status update: Connected'"" or "b'Status update: Connected'"" should appear and set warp_connected to that
     # "b'Success'" or "b'Status update: Connecting'" are also possible, but if returned, then retest again by recalling function
     warp_connected = str(warp_connected[1])
-    
     if warp_connected == "b'Status update: Connected'":
         connected = True
     elif warp_connected == "b'Status update: Disconnected'":
         connected = False
+    elif warp_connected == "b'Status update: No network'":
+        connected = False
+        messagebox.showerror("Error", "No Network Connection!")
+        sys.exit()
     else:
         # Means any of the two sought status' were not returned yet, so retry
-        update_conn_status()
+        get_conn_status()
 
     # Debug Condition to check extracted text
     #print("|" + warp_connected + "|")
 
 
-def connect_clicked():
+def toggle_connect():
     if connected:
         # Run command to disconnect and result should be 'Success' as result[0]
         result = (subprocess.run(['warp-cli', 'disconnect'], capture_output=True, text=True)).stdout
     else:
         # Run command to connect and result should be 'Success' as result[0]
         result = (subprocess.run(['warp-cli', 'connect'], capture_output=True, text=True)).stdout
-    # Now refresh
+    # Now check and fresh status
     refresh_all()
 
 
-def refresh_settings():
+def get_settings():
     global family_mode_status
     global always_connected
     # Clear any previous widgets displays before displaying new data
@@ -182,29 +185,22 @@ def refresh_settings():
     elif str(warp_settings_aon) == "b'Always On: true'":
         always_connected = True
     else:
-        # Pause 0.5 sec and retry as no valid option returned yet
-        time.sleep(0.5)
-        refresh_settings()
+        # Pause 500 msec and retry as no valid option returned yet
+        root.after(500, get_settings)
 
     # Define labels and display in frame for above settings
     warp_settings_aon_lbl = Label(frame_settings, text=warp_settings_aon)
     warp_settings_aon_lbl.grid(row=0, column=0, sticky=W)
-
     warp_settings_switch_lbl = Label(frame_settings, text=warp_settings_switch)
     warp_settings_switch_lbl.grid(row=1, column=0, sticky=W)
-
     warp_settings_mode_lbl = Label(frame_settings, text=warp_settings_mode)
     warp_settings_mode_lbl.grid(row=2, column=0, sticky=W)
-
     warp_settings_family_lbl = Label(frame_settings, text= warp_settings_family)
     warp_settings_family_lbl.grid(row=3, column=0, sticky=W)
-
     warp_settings_wifi_lbl = Label(frame_settings, text=warp_settings_wifi)
     warp_settings_wifi_lbl.grid(row=4, column=0, sticky=W)
-
     warp_settings_eth_lbl = Label(frame_settings, text=warp_settings_eth)
     warp_settings_eth_lbl.grid(row=5, column=0, sticky=W)
-
     warp_settings_dns_lbl = Label(frame_settings, text=warp_settings_dns)
     warp_settings_dns_lbl.grid(row=6, column=0, sticky=W)
 
@@ -218,18 +214,23 @@ def refresh_stats():
     if connected:
         # Check and read output of stats into a list, every line split into new list item, displayed in frame
         warp_stats = ((subprocess.run(['warp-cli', 'warp-stats'], capture_output=True)).stdout).splitlines()
-        warp_stats_time = warp_stats[1]
-        warp_stats_data = warp_stats[2]
-        warp_stats_latency = warp_stats[3]
-        warp_stats_loss = warp_stats[4]
-    
-        # Define labels and display in frame for above settings
-        warp_stats_time_lbl = Label(frame_stats, text=warp_stats_time).grid(row=0, column=0, sticky=W)
-        warp_stats_data_lbl = Label(frame_stats, text=warp_stats_data).grid(row=1, column=0, sticky=W)
-        warp_stats_latency_lbl = Label(frame_stats, text=warp_stats_latency).grid(row=2, column=0, sticky=W)
-        warp_stats_loss_lbl = Label(frame_stats, text=warp_stats_loss).grid(row=3, column=0, sticky=W)
+        # Check for lost network connection
+        if str(warp_stats[0]) != "b'Error: WARP is not connected.'":
+            warp_stats_time = warp_stats[1]
+            warp_stats_data = warp_stats[2]
+            warp_stats_latency = warp_stats[3]
+            warp_stats_loss = warp_stats[4]
+        
+            # Define labels and display in frame for above settings
+            warp_stats_time_lbl = Label(frame_stats, text=warp_stats_time).grid(row=0, column=0, sticky=W)
+            warp_stats_data_lbl = Label(frame_stats, text=warp_stats_data).grid(row=1, column=0, sticky=W)
+            warp_stats_latency_lbl = Label(frame_stats, text=warp_stats_latency).grid(row=2, column=0, sticky=W)
+            warp_stats_loss_lbl = Label(frame_stats, text=warp_stats_loss).grid(row=3, column=0, sticky=W)
+        else:
+            warp_stats_noconnect_lbl = Label(frame_stats, text="Network lost?").grid(padx=50, pady=25)
+            get_conn_status()
     else:
-        warp_stats_noconnect_lbl = Label(frame_stats, text="Not connected").grid(padx=60, pady=25)
+        warp_stats_noconnect_lbl = Label(frame_stats, text="WARP Disconnected").grid(padx=45, pady=25)
 
 def toggle_aon():
     global always_connected
@@ -239,33 +240,33 @@ def toggle_aon():
     else:
         # Run command to toggle to always connected on
         result = (subprocess.run(['warp-cli', 'enable-always-on'], capture_output=True, text=True)).stdout
-    refresh_settings()  # Will retrieve changed always_connected settings from CLI
-    display_aon()
+    refresh_all()
 
 def display_aon():
     global toggle_off, toggle_on
     global always_connected
     if always_connected:
         # ALWAYS CONNECTED toggle button to AON frame
-        always_conn_btn = Button(frame_aon, image = toggle_on, command=toggle_aon)
+        always_conn_btn = Button(frame_aon, image = toggle_on, command=toggle_aon, borderwidth=0, bg=root['bg'], activebackground=root['bg'])        
     else:
         # ALWAYS CONNECTED toggle button to AON frame
-        always_conn_btn = Button(frame_aon, image = toggle_off, command=toggle_aon)
+        always_conn_btn = Button(frame_aon, image = toggle_off, command=toggle_aon, borderwidth=0)
     always_conn_btn.grid(row=0, column=0, pady=20)
 
+
 def display_connect_btn():
-    # Add CONNECT BUTTON to Status frame with text description and colour
+    # Add CONNECT BUTTON to Status frame with text description and colours
     if connected:
-        myConnect_Btn = Button(frame_status, text=" Connected ", width=10, bg="#76a633", activebackground="#76a633", relief=RAISED, command=connect_clicked)
+        myConnect_Btn = Button(frame_status, text=" Connected ", width=10, bg="#76a633", activebackground="#76a633", borderwidth=2, relief=RAISED, command=toggle_connect)
     else:
-        myConnect_Btn = Button(frame_status, text="Disconnected", width=10, bg="#ff8d00", activebackground="#ff8d00", relief=SUNKEN, command=connect_clicked)
+        myConnect_Btn = Button(frame_status, text="Disconnected", width=10, bg="#ff8d00", activebackground="#ff8d00", borderwidth=2, relief=SUNKEN, command=toggle_connect)
     myConnect_Btn.grid(row=0, column=0)
 
 
 def refresh_all():
-    update_conn_status()
+    get_conn_status()
     display_connect_btn()
-    refresh_settings()
+    get_settings()
     refresh_stats()
     display_aon()
     # Start auto refresh stats function (only after refresh button pressed)
@@ -280,11 +281,12 @@ def auto_refresh_stats():
 
 
 # Main program starts here
-update_conn_status()
+get_conn_status()
 display_connect_btn()
-refresh_settings()
+get_settings()
 display_aon()
 refresh_stats()
+auto_refresh_stats()
 
 
 
