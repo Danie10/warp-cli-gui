@@ -34,6 +34,7 @@ Versions:
 - V1.0 31 Dec 2021 First stable version with just README file updated
 - V1.1 1 Jan 2022 Tidied up button press color, optimized some code, added Always On toggle setting
 - V1.2 2 Jan 2022 Removed border around toggle button, auto-refresh of stats every 2 secs when connected, optimized function naming, checks lost network connection
+- V1.3 3 Jan 2022 Code added to handle relative paths to files for single binary compiles with dependent files. Binary can be run on it's own now.
 
 
 TODO: - Option to switch WARP modes
@@ -51,12 +52,25 @@ from tkinter import messagebox
 import sys
 # To execute external CLI commands to read status and change settings
 import subprocess
+import os
 
 
 # Set global variable to test during execution
-version = "V1.2"
+version = "V1.3"
 connected = True
 update_interval = 2000 # Milliseconds
+
+# This function is to assist with paths for packaged binaries with Pyinstaller to find packaged dependent files
+def get_packaged_files_path():
+    """Location of relative paths """
+    if getattr(sys, 'frozen', False):
+        path = sys._MEIPASS  # pylint: disable=no-member
+    else:
+        path = '.'
+    return path
+
+# Get path for use in files later in app
+filepath = get_packaged_files_path()
 
 
 # set root window called root
@@ -64,17 +78,20 @@ root = Tk()
 # Set window title
 root.title('Cloudflare WARP GUI ' + version)
 # Set window logo
-root.iconphoto(True, PhotoImage(file="warp_logo.png"))
+#root.iconphoto(True, PhotoImage(file="warp_logo.png"))
+root.iconphoto(True, PhotoImage(file=os.path.join(filepath, 'warp_logo.png')))
 # Set size of main window
 root.geometry("420x410")
 # Prevent resizing of root window
 root.resizable(width=False, height=False)
 
 
-# Define Our Toggle Images
-toggle_on = PhotoImage(file = "on.png")
-toggle_off = PhotoImage(file = "off.png")
 
+# Define Our Toggle Images
+# toggle_on = PhotoImage(file = "on.png")
+toggle_on = PhotoImage(file=os.path.join(filepath, 'on.png'))
+# toggle_off = PhotoImage(file = "off.png")
+toggle_off = PhotoImage(file=os.path.join(filepath, 'off.png'))
 
 # Checks first to see if the app is running on Linux otherwise pops error and exits
 if sys.platform != "linux":
