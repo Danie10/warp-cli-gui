@@ -52,7 +52,7 @@ from tkinter import messagebox
 import sys
 # To execute external CLI commands to read status and change settings
 import subprocess
-import os
+from os import path
 
 
 # Set global variable to test during execution
@@ -60,17 +60,9 @@ version = "V1.3"
 connected = True
 update_interval = 2000 # Milliseconds
 
-# This function is to assist with paths for packaged binaries with Pyinstaller to find packaged dependent files
-def get_packaged_files_path():
-    """Location of relative paths """
-    if getattr(sys, 'frozen', False):
-        path = sys._MEIPASS  # pylint: disable=no-member
-    else:
-        path = '.'
-    return path
 
-# Get path for use in files later in app
-filepath = get_packaged_files_path()
+# Get path for use in files later in app so that they work with Pyinstaller binaries
+bundle_dir = path.abspath(path.dirname(__file__))
 
 
 # set root window called root
@@ -79,19 +71,19 @@ root = Tk()
 root.title('Cloudflare WARP GUI ' + version)
 # Set window logo
 #root.iconphoto(True, PhotoImage(file="warp_logo.png"))
-root.iconphoto(True, PhotoImage(file=os.path.join(filepath, 'warp_logo.png')))
+root.iconphoto(True, PhotoImage(file=path.join(bundle_dir, 'warp_logo.png')))
 # Set size of main window
 root.geometry("420x410")
 # Prevent resizing of root window
 root.resizable(width=False, height=False)
 
 
-
 # Define Our Toggle Images
 # toggle_on = PhotoImage(file = "on.png")
-toggle_on = PhotoImage(file=os.path.join(filepath, 'on.png'))
+toggle_on = PhotoImage(file=path.join(bundle_dir, 'on.png'))
 # toggle_off = PhotoImage(file = "off.png")
-toggle_off = PhotoImage(file=os.path.join(filepath, 'off.png'))
+toggle_off = PhotoImage(file=path.join(bundle_dir, 'off.png'))
+
 
 # Checks first to see if the app is running on Linux otherwise pops error and exits
 if sys.platform != "linux":
@@ -108,6 +100,7 @@ daemon = subprocess.call(['systemctl', 'is-active', '--quiet', 'warp-svc'])
 if daemon != 0:
     messagebox.showerror("Error", "Start daemon from CLI with\n'sudo systemctl start warp-svc'\nand ensure registration has run")
     sys.exit()
+
 
 # Define frame for Connection Status
 frame_status = LabelFrame(root, text="Status", padx=10, pady=10)
