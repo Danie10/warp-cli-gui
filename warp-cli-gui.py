@@ -35,6 +35,7 @@ Versions:
 - V1.1 1 Jan 2022 Tidied up button press color, optimized some code, added Always On toggle setting
 - V1.2 2 Jan 2022 Removed border around toggle button, auto-refresh of stats every 2 secs when connected, optimized function naming, checks lost network connection
 - V1.3 3 Jan 2022 Code added to handle relative paths to files for single binary compiles with dependent files. Binary can be run on it's own now.
+- V1.4 18 Feb 2022 Fix "not defined bug" for 'always_connected' variable line 258
 
 
 TODO: - Option to switch WARP modes
@@ -56,9 +57,10 @@ from os import path
 
 
 # Set global variable to test during execution
-version = "V1.3"
+version = "V1.4"
 connected = True
 update_interval = 2000 # Milliseconds
+always_connected = True
 
 
 # Get path for use in files later in app so that they work with Pyinstaller binaries
@@ -243,7 +245,7 @@ def refresh_stats():
         warp_stats_noconnect_lbl = Label(frame_stats, text="WARP Disconnected").grid(padx=45, pady=25)
 
 def toggle_aon():
-    global always_connected
+#    global always_connected
     if always_connected:
         # Run command to toggle to always connected off
         result = (subprocess.run(['warp-cli', 'disable-always-on'], capture_output=True, text=True)).stdout
@@ -254,7 +256,7 @@ def toggle_aon():
 
 def display_aon():
     global toggle_off, toggle_on
-    global always_connected
+#    global always_connected
     if always_connected:
         # ALWAYS CONNECTED toggle button to AON frame
         always_conn_btn = Button(frame_aon, image = toggle_on, command=toggle_aon, borderwidth=0, bg=root['bg'], activebackground=root['bg'])        
