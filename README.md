@@ -35,6 +35,7 @@
 - Option to switch WARP modes
 - Maybe graphs where relevant eg. latency
 - Can it show connect status on panel when minimized (Qt can)?
+- Cloudflare WARP driver updates from Jan 2022 have effected Settings display
 
 ## Video
 See my video about the initial creation of this app at https://youtu.be/hhPhiV0o5us.
@@ -49,6 +50,7 @@ See my video about the initial creation of this app at https://youtu.be/hhPhiV0o
 - V1.1 1 Jan 2022 Tidied up button press color, optimized some code, added Always On toggle setting
 - V1.2 2 Jan 2022 Removed border around toggle button, auto-refresh of stats every 2 secs when connected, optimized function naming, checks lost network connection
 - V1.3 3 Jan 2022 Code added to handle relative paths to files for single binary compiles with dependent files. Binary can be run on it's own now.
+- V1.4 18 Feb 2022 Fix "not defined bug" for 'always_connected' variable line 258
 
 ## License
 This software is available under the GPL-3.0. You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/> for more info.
