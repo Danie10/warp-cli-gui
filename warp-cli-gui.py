@@ -30,12 +30,15 @@ Versions:
 - V0.2 Connect/Disconnect button working, Top frames and status button better aligned, connect status not reliable yet though
 - V0.3 Connect/Disconnect button status is finally stable through IF condition testing more rigorously for alternatives being returned from status command
 - V0.4 30 Dec 2021 Fixed size window, with fixed size frames and spacing
-- V0.5 31 Dec 2021 Cloudflare Warp logo added, connect status button colours changed (thanks to my wife Chantel for helping with this), family mode radio button defaults to existing setting, stats auto refresh every 2 secs after Refresh button pressed
+- V0.5 31 Dec 2021 Cloudflare Warp logo added, connect status button colours changed (thanks to my wife Chantel for helping with this), \
+    family mode radio button defaults to existing setting, stats auto refresh every 2 secs after Refresh button pressed
 - V1.0 31 Dec 2021 First stable version with just README file updated
 - V1.1 1 Jan 2022 Tidied up button press color, optimized some code, added Always On toggle setting
 - V1.2 2 Jan 2022 Removed border around toggle button, auto-refresh of stats every 2 secs when connected, optimized function naming, checks lost network connection
 - V1.3 3 Jan 2022 Code added to handle relative paths to files for single binary compiles with dependent files. Binary can be run on it's own now.
 - V1.4 18 Feb 2022 Fix "not defined bug" for 'always_connected' variable line 258
+- V1.5 19 Feb 2022 Updated UI and interpretation of the CLI output to handle Linux driver update for cloudflare-warp-bin 2022.2.29-1 dated 2022-02-13. \
+Settings output had added a preceding line, and the family mode status had "Some(status)" added
 
 
 TODO: - Option to switch WARP modes
@@ -57,7 +60,7 @@ from os import path
 
 
 # Set global variable to test during execution
-version = "V1.4"
+version = "V1.5"
 connected = True
 update_interval = 2000 # Milliseconds
 always_connected = True
@@ -109,12 +112,12 @@ frame_status = LabelFrame(root, text="Status", padx=10, pady=10)
 frame_status.grid(row=0, column=0, padx=10, pady=10)
 
 # Define frame for Settings
-frame_settings = LabelFrame(root, width=230, height=190, text="Settings", padx=10, pady=10)
+frame_settings = LabelFrame(root, width=242, height=190, text="Settings", padx=10, pady=10)
 frame_settings.grid(rowspan=2, sticky=NW, row=0, column=1, padx=10, pady=10)
 frame_settings.grid_propagate(False)  # Stops frame shrinking with smaller contents
 
 # Define frame for Stats
-frame_stats = LabelFrame(root, width=230, height=130, text="Stats", padx=10, pady=10)
+frame_stats = LabelFrame(root, width=242, height=130, text="Stats", padx=10, pady=10)
 frame_stats.grid(row=2, column=1, padx=10, pady=10)
 frame_stats.grid_propagate(False)  # Stops frame shrinking with smaller contents
 
@@ -182,15 +185,16 @@ def get_settings():
         widgets.destroy()
     # Check and read output of 'warp-cli settings' into a Python list, every line split into new list item
     warp_settings = ((subprocess.run(['warp-cli', 'settings'], capture_output=True)).stdout).splitlines()
-    warp_settings_aon = warp_settings[0]
-    warp_settings_switch = warp_settings[1]
-    warp_settings_mode = warp_settings[2]
-    warp_settings_family = warp_settings[3]
-    warp_settings_wifi = warp_settings[4]
-    warp_settings_eth = warp_settings[5]
-    warp_settings_dns = warp_settings[6]
+    warp_settings_aon = warp_settings[1]
+    warp_settings_switch = warp_settings[2]
+    warp_settings_mode = warp_settings[3]
+    warp_settings_family = warp_settings[4]
+    warp_settings_wifi = warp_settings[5]
+    warp_settings_eth = warp_settings[6]
+    warp_settings_dns = warp_settings[7]
     # Set global family_mode_status to just extracted value at end
-    family_mode_status = warp_settings_family[25 : ].lower()
+    # Modified v1.5 to cater for change in format to strip off also the "Some(" and ending ")"
+    family_mode_status = warp_settings_family[30 : -1].lower()
     # Set global value always_connected to boolean of retrieved warp_settings_aon
     if str(warp_settings_aon) == "b'Always On: false'":
         always_connected = False
@@ -304,6 +308,7 @@ auto_refresh_stats()
 
 # Family mode radio buttons to Family frame
 family_mode = StringVar()
+
 # Set default radio button to family_mode_status returned from checking settings
 family_mode.set(family_mode_status)
 # Define radio buttons and display

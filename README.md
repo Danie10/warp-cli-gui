@@ -51,6 +51,7 @@ See my video about the initial creation of this app at https://youtu.be/hhPhiV0o
 - V1.2 2 Jan 2022 Removed border around toggle button, auto-refresh of stats every 2 secs when connected, optimized function naming, checks lost network connection
 - V1.3 3 Jan 2022 Code added to handle relative paths to files for single binary compiles with dependent files. Binary can be run on it's own now.
 - V1.4 18 Feb 2022 Fix "not defined bug" for 'always_connected' variable line 258
+- V1.5 19 Feb 2022 Updated UI and interpretation of the CLI output to handle Linux driver update for cloudflare-warp-bin 2022.2.29-1 dated 2022-02-13. Settings output had added a preceding line, and the family mode status had "Some(status)" added
 
 ## License
 This software is available under the GPL-3.0. You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/> for more info.
