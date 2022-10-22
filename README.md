@@ -1,4 +1,5 @@
 # warp-cli-gui
+![Python](https://img.shields.io/badge/python-3670A0?style=plastic&logo=python&logoColor=ffdd54) [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg?style=plastic)](https://www.gnu.org/licenses/gpl-3.0)
 <p>GUI app to read settings and stats for Cloudflare WARP CLI for Linux, and change some of those settings via the CLI.</p>
 
 ![Screenshot Connected](assets/screenshot_connected.jpg)
